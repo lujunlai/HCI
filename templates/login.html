@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Credit System</title>
+</head>
+<body>
+<form id="INFO" method="POST">
+<p>ID:</p>
+<input type="text" name="ID" id="ID"/>
+<p>PASSWORD:</p>
+<input type="password" name="PASSWORD" id="PASSWORD"/>
+<p>CHECKCODE:</p>
+<input type="text" name="CHECKCODE" id="CHECKCODE"/><br>
+<img id="img" src="/CheckCode"/><br>
+<button value="Login" click=submit()>Login</button>
+</form>
+</body>
+<script src="static/jquery-3.2.1.min.js"></script>
+<script src="static/jquery.form.js"></script>
+<script>
+	function submit(){
+    $("#INFO").ajaxSubmit(function(data){
+                 document.write(data);
+				 });
+				 }
+</script>
+</html>
