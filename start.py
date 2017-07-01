@@ -5,14 +5,10 @@ import requests
 from bs4 import BeautifulSoup
 app = Flask(__name__)
 CORS(app,supports_credentials=True)
-state=[]
-user_mapping={}
 cookie=None
 @app.route('/',methods=['GET','POST'])
 def login():
     global cookie
-    global state
-    global user_mapping
     if request.method=="GET":
         return render_template("login.html")
     elif request.method=="POST" and request.form.get("PASSWORD") and request.form.get("ID") and request.form.get("CHECKCODE"):
@@ -29,8 +25,6 @@ def login():
         response = requests.request("POST", url, data=payload, headers=headers,cookies=cookie)
         if response.text.startswith("<script"):
             return response.text.split("\n")[0]+render_template("login.html")
-        state.append(request.remote_addr)
-        user_mapping[request.remote_addr]=request.form.get("ID")
         url = "http://jwbinfosys.zju.edu.cn/xscj.aspx"
 
         querystring = {"xh": request.form.get("ID")}
@@ -39,12 +33,19 @@ def login():
         headers = {
             'content-type': "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
             'cache-control': "no-cache",
-            'postman-token': "2cdb0055-4206-2920-6949-c93bf8be57ec"
+            "User-Agent":"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
+            "Connection": "keep - alive"
         }
 
         response = requests.request("POST", url, data=payload, headers=headers, params=querystring,cookies=cookie)
         soup=BeautifulSoup(response.text,'html.parser')
         info=soup.find(id="Table1")
+        scorelist=info.next_sibling.next_sibling.find_all("tr")
+        dict={}
+        dict=add(dict,scorelist[1:])
+        print dict
+        print sum(dict.values())
+
         return info.prettify()+info.next_sibling.next_sibling.prettify()
     else:
         return render_template("login.html")
@@ -64,5 +65,20 @@ def CheckCode():
     cookie=response.cookies
     return response.content
 
+
+def add(dict,list):
+    for x in list:
+        name=x.find("td")
+        mark=name.next_sibling.next_sibling.next_sibling
+        score=mark.next_sibling
+        if float(score.text)>0:
+            if  dict.get(name.text.split("-")[3]) and  name.text.split("-")[3].startswith("401"):
+                dict[name.text.split("-")[3]] += float(mark.text)
+            else:
+                dict[name.text.split("-")[3]]=float(mark.text)
+
+    return dict
+
+
 if __name__=="__main__":
-    app.run(host="0.0.0.0",debug=True)
+    app.run(debug=True)
