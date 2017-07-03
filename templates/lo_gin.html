@@ -54,12 +54,12 @@
                     var err_msg = return_val.split(";")[1];
                     if (suc == '1') {
                         toastr.options.closeButton = true;
-                        toastr.options.timeOut = 1000;
+                        //toastr.options.timeOut = 1000;
                         toastr.success('登录成功!');
 						setTimeout('process('+err_msg+')',500);
                     } else {
                         toastr.options.closeButton = true;
-                        toastr.options.timeOut = 1000;
+                        //toastr.options.timeOut = 1000;
                         toastr.error('登录失败! '+ err_msg.split("('")[1].split("')")[0]);
                 }});
             },
