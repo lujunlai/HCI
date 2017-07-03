@@ -3,14 +3,21 @@ from flask import Flask,render_template,request#,jsonify
 from flask_cors import *
 import requests
 from bs4 import BeautifulSoup
+import pickle
+from match import match
+import json
 app = Flask(__name__)
 CORS(app,supports_credentials=True)
 cookie=None
+input = open('curriculum.pkl', 'rb')
+curriculum = pickle.load(input)
+input.close()
 @app.route('/',methods=['GET','POST'])
 def login():
     global cookie
+    global curriculum
     if request.method=="GET":
-        return render_template("login.html")
+        return render_template("lo_gin.html")
     elif request.method=="POST" and request.form.get("PASSWORD") and request.form.get("ID") and request.form.get("CHECKCODE"):
         url = "http://jwbinfosys.zju.edu.cn/default2.aspx"
         print request.form.get("PASSWORD") , request.form.get("ID") , request.form.get("CHECKCODE")
@@ -24,7 +31,7 @@ def login():
 
         response = requests.request("POST", url, data=payload, headers=headers,cookies=cookie)
         if response.text.startswith("<script"):
-            return response.text.split("\n")[0]+render_template("login.html")
+            return "0;"+response.text.split("\n")[0]
         url = "http://jwbinfosys.zju.edu.cn/xscj.aspx"
 
         querystring = {"xh": request.form.get("ID")}
@@ -43,12 +50,14 @@ def login():
         scorelist=info.next_sibling.next_sibling.find_all("tr")
         dict={}
         dict=add(dict,scorelist[1:])
-        print dict
-        print sum(dict.values())
+        result=match(curriculum,dict)
+        return "1;"+json.dumps(result)
+        #print dict
+        #print sum(dict.values())
 
-        return info.prettify()+info.next_sibling.next_sibling.prettify()
+        #return info.prettify()+info.next_sibling.next_sibling.prettify()
     else:
-        return render_template("login.html")
+        return render_template("lo_gin.html")
 
 @app.route('/CheckCode',methods=['GET','POST'])
 def CheckCode():
