@@ -1,6 +1,7 @@
 #encoding=utf8
 import pickle
 import copy
+from itertools import combinations
 
 def match(curriculum,myCourse):
 	curriculum_need={1:{1:{},2:{},3:{},4:{},5:{}}, 2:{1:{},2:{}}, 3:{1:{},2:{},3:{1:{},2:{}},4:{}},4:{}}
@@ -131,6 +132,7 @@ def match(curriculum,myCourse):
 	courseJ=False
 	
 	course_del=[]
+	A={}
 	for key in myCourse:
 		if 'S' in key:
 			curriculum_have[1][5][key]=myCourse[key]
@@ -164,10 +166,30 @@ def match(curriculum,myCourse):
 			credit_social+=myCourse[key]
 			course_del.append(key)
 		if 'A' in key:
-			curriculum_have[1][5][key]=myCourse[key]
-			credit_social+=myCourse[key]
-			course_del.append(key)
-
+			A[key]=myCourse[key]
+	sorted_dict = sorted(A.items(), key=lambda A: A[1])
+	list = sorted(A.values())
+	final = 0
+	final_index = []
+	for i in range(len(list)):
+		templist = combinations(range(len(list)), i)
+		mintempA = []
+		mintemx = []
+		for x in templist:
+			tempA=0
+			for k in range(len(x)):
+				tempA = tempA + list[x[k]]
+			mintempA.append(tempA)
+			mintemx.append(x)
+		for t in range(len(mintempA)):
+			if (6 - credit_social) - mintempA[t] + (7 - credit) <= 0:
+				if final==0 or (6 - credit_social) - mintempA[t] + (7 - credit)>final:
+					final=(6 - credit_social) - mintempA[t] + (7 - credit)
+					final_index=mintemx[t]
+	for index in final_index:
+		curriculum_have[1][5][sorted_dict[index][0]] = sorted_dict[index][1]
+		credit_social += sorted_dict[index][1]
+		course_del.append(sorted_dict[index][0])
 	for k in course_del:
 		# print(k)
 		myCourse.pop(k)
