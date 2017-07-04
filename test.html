@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
@@ -69,7 +69,18 @@
 	}
 	function choose(){
 		if (ss)
-		{window.open('/check')}
+		{$.ajax({
+		type: "GET",
+		url: '/cookie',
+		cache: false,
+		async: false,
+		success: function(data){
+			data=data.slice(1,-1);
+			document.cookie='{'+data.split(':')[0]+'='+data.split(':')[1]+'}';
+			alert(id);
+			window.open(id);
+		}
+		})}
 		else
 			{toastr.options.closeButton = true;
 			//toastr.options.timeOut = 1000;
@@ -91,7 +102,7 @@
                         toastr.success('登录成功!');
 						setTimeout('process('+err_msg+')',500);
 						//alert(id);
-						//id='http://jwbinfosys.zju.edu.cn/xscxbm.aspx?xh='+$('#name').val();
+						id='http://jwbinfosys.zju.edu.cn/xscxbm.aspx?xh='+$('#name').val();
 						//alert(id);
 						ss=1;
                     } else {

@@ -1,0 +1,41 @@
+﻿<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Info</title>
+<link rel="stylesheet" type="text/css" href="static/css/styles.css">
+</head>
+<body>
+<div class="htmleaf-container">
+	<div class="wrapper" id="wrapper">
+		<div class="container" id="container">		
+			<form class="form" id="INFO" method="POST" target="nm_iframe" name="INFO">
+			</form>
+		</div>
+		<ul class="bg-bubbles">
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+		</ul>
+	</div>
+</div>
+
+<script>
+	var s={{s|tojson}};
+	document.getElementById('INFO').innerHTML=s;
+</script>
+
+<div style="text-align:center;margin:50px 0; font:normal 14px/24px 'MicroSoft YaHei';color:#000000">
+<h1 id='t'>Info Check</h1>
+</div>
+</body>
+</html>

@@ -11,14 +11,19 @@ CORS(app,supports_credentials=True)
 cookie=None
 input = open('curriculum.pkl', 'rb')
 curriculum = pickle.load(input)
+id=None
 input.close()
+info=None
 @app.route('/',methods=['GET','POST'])
 def login():
     global cookie
     global curriculum
+    global info
+    global id
     if request.method=="GET":
         return render_template("lo_gin.html")
     elif request.method=="POST" and request.form.get("PASSWORD") and request.form.get("ID") and request.form.get("CHECKCODE"):
+        id=request.form.get("ID")
         url = "http://jwbinfosys.zju.edu.cn/default2.aspx"
         print request.form.get("PASSWORD") , request.form.get("ID") , request.form.get("CHECKCODE")
         payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"TextBox1\"\r\n\r\n"+request.form.get("ID")+"\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"TextBox2\"\r\n\r\n"+request.form.get("PASSWORD")+"\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"TextBox3\"\r\n\r\n"+request.form.get("CHECKCODE")+"\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"__VIEWSTATE\"\r\n\r\ndDwxNTc0MzA5MTU4Ozs+b5wKASjiu+fSjITNzcKuKXEUyXg=\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"__EVENTTARGET\"\r\n\r\nButton1\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--"
@@ -41,14 +46,13 @@ def login():
             'content-type': "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
             'cache-control': "no-cache",
             "User-Agent":"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
-            "Connection": "keep - alive"
         }
 
         response = requests.request("POST", url, data=payload, headers=headers, params=querystring,cookies=cookie)
         soup=BeautifulSoup(response.text,'html.parser')
         info=soup.find(id="Table1")
         scorelist=info.next_sibling.next_sibling.find_all("tr")
-        dict={}
+        dict = {}
         dict=add(dict,scorelist[1:])
         result=match(curriculum,dict)
         return "1;"+json.dumps(result)
@@ -67,13 +71,49 @@ def CheckCode():
     headers = {
         'cache-control': "no-cache",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
-        "Connection": "keep - alive"
     }
 
     response = requests.request("GET", url, headers=headers)
     cookie=response.cookies
     return response.content
 
+@app.route('/info',methods=['GET','POST'])
+def search():
+    global info
+    if info:
+        return render_template('info.html',s=info.prettify()+"\n"+info.next_sibling.next_sibling.prettify())
+    else:
+        return ''
+
+@app.route('/check',methods=['GET','POST'])
+def check():
+    global cookie
+    global id
+    # if cookie:
+    #     return json.dumps(dict(cookie))
+    # else:
+    #     return ''
+    if cookie and id:
+        url = "http://jwbinfosys.zju.edu.cn/xscxbm.aspx"
+        querystring = {"xh": id}
+        headers = {
+            'cache-control': "no-cache",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
+        }
+        response = requests.request("GET", url, headers=headers, params=querystring,cookies=cookie)
+        return response.text
+    else:
+        return ''
+
+@app.route('/close',methods=['GET','POST'])
+def close():
+    global cookie
+    global info
+    global id
+    cookie=None
+    info=None
+    id=None
+    return ''
 
 def add(dict,list):
     for x in list:
@@ -90,4 +130,4 @@ def add(dict,list):
 
 
 if __name__=="__main__":
-    app.run(debug=True)
+    app.run(debug=True,threaded=True)
