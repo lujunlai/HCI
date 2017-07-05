@@ -6,6 +6,9 @@ from bs4 import BeautifulSoup
 import pickle
 from match import match
 import json
+#import sys
+#reload(sys)
+#sys.setdefaultencoding('utf8')
 app = Flask(__name__)
 CORS(app,supports_credentials=True)
 cookie=None
@@ -94,13 +97,75 @@ def check():
     # else:
     #     return ''
     if cookie and id:
-        url = "http://jwbinfosys.zju.edu.cn/xscxbm.aspx"
-        querystring = {"xh": id}
-        headers = {
-            'cache-control': "no-cache",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
-        }
+        # url = "http://jwbinfosys.zju.edu.cn/xscxbm.aspx"
+        # querystring = {"xh": id}
+        # headers = {
+        #     'cache-control': "no-cache",
+        #     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
+        # }
+        # response = requests.request("GET", url, headers=headers, params=querystring,cookies=cookie)
+        if request.method == "POST" and request.form.get("DropDownList1") and request.form.get("What"):
+            url = "http://jwbinfosys.zju.edu.cn/xscxbm.aspx"
+
+            querystring = {"xh": id}
+
+            payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-datainfo; name=\"__VIEWSTATE\"\r\n\r\ndDwxOTk4MDIzMTIxOztsPENoZWNrQm94MTs+PmUsjUsgXHtqC5Iro8/RjQSpD4QW\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"Dropdownlist_gx1\"\r\n\r\nlike\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"DropDownList1\"\r\n\r\n" + request.form.get(
+                "DropDownList1") + "\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"TextBox1\"\r\n\r\n" + request.form.get(
+                "What") + "\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"Button5\"\r\n\r\n\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--"
+            headers = {
+                'content-type': "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+                'cache-control': "no-cache",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
+            }
+
+            response = requests.request("POST", url, data=payload, headers=headers, params=querystring, cookies=cookie)
+            soup=BeautifulSoup(response.text,'html.parser')
+            s=soup.find("div",class_='mainframe').prettify()
+            s=s.replace("html_kc","http://jwbinfosys.zju.edu.cn/html_kc")
+            s = s.replace("tpml", "http://jwbinfosys.zju.edu.cn/tpml")
+            s=s.replace("xsxjs.aspx",'choose')
+            return s
+        elif request.method=="GET":
+            return render_template('search.html')
+        else:
+            return ''
+        #return render_template('search.html')
+    else:
+        return ''
+
+@app.route('/choose',methods=['GET','POST'])
+def choose():
+    global cookie
+    url = "http://jwbinfosys.zju.edu.cn/xsxjs.aspx"
+    querystring = request.args
+    headers = {
+        'cache-control': "no-cache",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
+    }
+    if request.method=="GET":
         response = requests.request("GET", url, headers=headers, params=querystring,cookies=cookie)
+    #return response.text
+        s=response.text
+        s=s.replace('src="','src="http://jwbinfosys.zju.edu.cn/')
+        s=s.replace("src='", "src='http://jwbinfosys.zju.edu.cn/")
+        s=s.replace("href='", "href='http://jwbinfosys.zju.edu.cn/")
+        s = s.replace('href="', 'href="http://jwbinfosys.zju.edu.cn/')
+        return s
+    else:
+        return ''
+
+@app.route('/ajax/zjdx.AjaxForm,zjdx.ashx', methods=['GET', 'POST'])
+def make():
+    global cookie
+    url = "http://jwbinfosys.zju.edu.cn/ajax/zjdx.AjaxForm,zjdx.ashx"
+    querystring = request.args
+    headers = {
+        'cache-control': "no-cache",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
+    }
+    if request.method=="POST":
+        form=request.form
+        response = requests.request("POST", url,data=request.data , headers=headers,params=querystring, cookies=cookie)
         return response.text
     else:
         return ''

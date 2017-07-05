@@ -33,7 +33,7 @@
 		</ul>
 	</div>
 	<button class="button" onclick=watch()>watch</button>
-	<button class="button" onclick=choose()>choose</button>
+	<button class="button" onclick=choose()>search</button>
 	<button class="button" onclick=out()>out</button>
 </div>
 <iframe id="id_iframe" name="nm_iframe" style="display:none;"></iframe>
@@ -60,7 +60,7 @@
 			{
 			toastr.options.closeButton = true;
 			//toastr.options.timeOut = 1000;
-			toastr.info('please login');
+			toastr.info('sign out');
 			setTimeout('location.reload();',500);}
 		else
 			{toastr.options.closeButton = true;
