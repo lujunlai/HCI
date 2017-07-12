@@ -282,9 +282,10 @@ def match(curriculum,myCourse):
 			course[key]=curriculum[3][2][key]
 	if curriculum[3][2]['credit']<=credit:
 		course={}
-		course['credit_need']=0
-	else:
-		course['credit_need']=curriculum[3][2]['credit']-credit
+		#course['credit_need']=0
+	#else:
+	#	course['credit_need']=curriculum[3][2]['credit']-credit
+	course['credit_need']=curriculum[3][2]['credit']-credit
 	curriculum_have[3][2]['credit']=credit
 	curriculum_need[3][2]=course
 
@@ -348,7 +349,7 @@ def match(curriculum,myCourse):
 	# 个性课程
 	credit=0
 	for key in myCourse:
-		if curriculum_need[3][2]<0:
+		if curriculum_need[3][2]['credit_need']<0:
 			credit-=curriculum_need[3][2]['credit_need']
 			curriculum_need[4]['overflow']=-curriculum_need[3][2]['credit_need']
 			curriculum_need[3][2]['credit_need']=0
